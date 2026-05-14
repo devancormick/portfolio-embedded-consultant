@@ -17,29 +17,30 @@ const Contact: React.FC = () => {
     }
     setStatus('loading');
     try {
-      await fetch('/api/crm/6a19c4289e82e366e6f8343d/subscribe', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: form.email,
           name: form.name,
-          metadata: {
-            message: form.message,
-            source: 'portfolio-contact'
-          }
+          email: form.email,
+          message: form.message
         })
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Request failed');
+      }
       setStatus('success');
       setForm({
         name: '',
         email: '',
         message: ''
       });
-    } catch {
+    } catch (err) {
       setStatus('error');
-      setError('Something went wrong. Please email me directly.');
+      setError(err instanceof Error && err.message ? err.message : 'Something went wrong. Please email me directly.');
     }
   };
   return <section id="contact" className="bg-slate-900 py-24 relative overflow-hidden">
